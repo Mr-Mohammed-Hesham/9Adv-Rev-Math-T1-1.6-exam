@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> حل التناسبات - الصف التاسع المتقدم | Solving Proportions</title>
+<meta name="description" content="امتحان تفاعلي شامل عن حل التناسبات - رياضيات الصف 9 المتقدم">
+<meta name="author" content="Mr. Mohammed Hesham">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Cairo', sans-serif; }
+body.en-mode { font-family: 'Inter', sans-serif; }
+.correct { background-color: #dcfce7 !important; border-color: #16a34a !important; }
+.incorrect { background-color: #fee2e2 !important; border-color: #dc2626 !important; }
+.timer-warning { color: #dc2626 !important; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: 0.7; } }
+@media print { .no-print { display: none !important; } }
+.success-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.875rem; }
+.grade-excellent { background: #dcfce7; color: #166534; }
+.grade-good { background: #fef3c7; color: #92400e; }
+.grade-pass { background: #dbeafe; color: #1e40af; }
+.grade-fail { background: #fee2e2; color: #991b1b; }
+.lang-switch {
+position: fixed; top: 16px; left: 16px; z-index: 100;
+background: white; padding: 6px; border-radius: 30px;
+box-shadow: 0 4px 15px rgba(0,0,0,0.15); display: flex; gap: 4px;
+border: 2px solid #ea580c;
+}
+[dir="ltr"] .lang-switch { left: auto; right: 16px; }
+.lang-btn {
+padding: 6px 14px; border-radius: 20px; cursor: pointer; font-weight: bold;
+transition: all 0.3s; border: none; font-size: 0.875rem;
+background: transparent; color: #6b7280;
+}
+.lang-btn.active { background: #ea580c; color: white; box-shadow: 0 2px 6px rgba(234,88,12,0.4); }
+.lang-btn:hover:not(.active) { background: #fff7ed; color: #ea580c; }
+.shuffle-badge {
+display: inline-block;
+background: linear-gradient(135deg, #ea580c, #dc2626);
+color: white; padding: 4px 12px; border-radius: 20px;
+font-size: 0.75rem; font-weight: bold; margin-right: 8px;
+}
+.math-display {
+display: inline-block; direction: ltr;
+font-family: 'Times New Roman', 'Cambria Math', serif;
+font-size: 1.2em; font-style: italic;
+padding: 2px 8px; background: #fff7ed;
+border-radius: 6px; margin: 2px;
+color: #9a3412; font-weight: 600; letter-spacing: 0.5px;
+}
+.save-indicator {
+position: fixed; bottom: 20px; left: 20px; z-index: 200;
+background: #10b981; color: white; padding: 8px 16px;
+border-radius: 20px; font-size: 0.8rem; font-weight: bold;
+opacity: 0; transition: opacity 0.3s; pointer-events: none;
+box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+}
+.save-indicator.show { opacity: 1; }
+.formula-box {
+background: #fff7ed; border: 2px solid #f97316;
+border-radius: 8px; padding: 12px; margin: 10px 0;
+font-family: 'Times New Roman', serif;
+direction: ltr; text-align: center;
+}
+.proportion-example {
+background: linear-gradient(135deg, #fef3c7, #fde68a);
+border: 2px solid #f59e0b;
+border-radius: 12px;
+padding: 15px;
+margin: 15px 0;
+text-align: center;
+}
+</style>
+</head>
+<body class="bg-gradient-to-br from-orange-50 to-amber-50 text-gray-800 p-4 md:p-8 min-h-screen">
+
+<div class="lang-switch no-print">
+<button class="lang-btn active" onclick="setLanguage('ar')" id="btn-ar">عربي</button>
+<button class="lang-btn" onclick="setLanguage('en')" id="btn-en">EN</button>
+</div>
+
+<div id="saveIndicator" class="save-indicator"> <span data-ar="تم الحفظ" data-en="Saved">تم الحفظ</span></div>
+
+<div id="timer-container" class="max-w-4xl mx-auto mb-4 text-center no-print">
+<div class="bg-white p-4 rounded-2xl shadow-md inline-block border-2 border-orange-100">
+<span class="text-gray-600 ml-2" data-ar="⏰ الوقت المتبقي:" data-en="⏰ Time Remaining:">⏰ الوقت المتبقي:</span>
+<span id="timer" class="text-2xl font-bold text-orange-600 font-mono">45:00</span>
+<span class="shuffle-badge" data-ar="🎲 أسئلة عشوائية" data-en="🎲 Random Questions"> أسئلة عشوائية</span>
+</div>
+</div>
+
+<div class="max-w-4xl mx-auto mb-6 flex flex-wrap gap-3 justify-center no-print">
+<button onclick="toggleAnswers()" class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2 rounded-xl font-medium transition shadow cursor-pointer" data-ar="👀 إظهار / إخفاء الإجابات" data-en="👀 Show / Hide Answers">👀 إظهار / إخفاء الإجابات</button>
+<button onclick="window.print()" class="bg-gray-700 hover:bg-gray-900 text-white px-5 py-2 rounded-xl font-medium transition shadow cursor-pointer" data-ar="🖨️ طباعة" data-en="🖨️ Print">🖨️ طباعة</button>
+<button onclick="reshuffleExam()" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white px-5 py-2 rounded-xl font-medium transition shadow cursor-pointer" data-ar="🔄 أسئلة جديدة" data-en="🔄 New Questions">🔄 أسئلة جديدة</button>
+<button onclick="clearProgress()" class="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl font-medium transition shadow cursor-pointer" data-ar="🗑️ مسح التقدم" data-en="🗑️ Clear Progress">️ مسح التقدم</button>
+</div>
+
+<header class="max-w-4xl mx-auto bg-white p-6 rounded-2xl shadow-lg mb-8 border-4 border-orange-400">
+<div class="text-center">
+<h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2" data-ar=" حل التناسبات (Solving Proportions)" data-en="📐 Solving Proportions">📐 حل التناسبات (Solving Proportions)</h1>
+<h2 class="text-lg text-orange-600 font-semibold" data-ar="الصف التاسع المتقدم (رياضيات)" data-en="Grade 9 Advanced (Mathematics)">الصف التاسع المتقدم (رياضيات)</h2>
+<p class="text-sm text-gray-600 mt-2" data-ar="التناسب، الضرب التبادلي، حل المعادلات الكسرية" data-en="Proportions, Cross Multiplication, Solving Fractional Equations">التناسب، الضرب التبادلي، حل المعادلات الكسرية</p>
+<p class="text-xs text-green-600 mt-2 font-semibold" data-ar="💾 يتم حفظ تقدمك تلقائياً - 20 سؤالاً في 4 أقسام" data-en="💾 Your progress is saved automatically - 20 questions in 4 sections"> يتم حفظ تقدمك تلقائياً - 20 سؤالاً في 4 أقسام</p>
+</div>
+<div class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-gray-600">
+<span><span data-ar="📅 التاريخ:" data-en="📅 Date:"> التاريخ:</span> <input type="text" id="examDate" class="border-b-2 border-orange-300 bg-transparent w-28 text-center"></span>
+<span><span data-ar="😊 الاسم:" data-en="😊 Name:">😊 الاسم:</span> <input type="text" id="studentName" class="border-b-2 border-orange-300 bg-transparent w-32 text-center" placeholder="اكتب اسمك"></span>
+<span><span data-ar="🏫 الشعبة:" data-en=" Class:">🏫 الشعبة:</span> <input type="text" id="studentClass" class="border-b-2 border-orange-300 bg-transparent w-28 text-center" placeholder="الشعبة"></span>
+<span><span data-ar=" المدة: 45 دقيقة" data-en="⏰ Duration: 45 min">⏰ المدة: 45 دقيقة</span></span>
+<span><span data-ar=" المجموع: 100 درجة" data-en="📊 Total: 100 pts">📊 المجموع: 100 درجة</span></span>
+</div>
+</header>
+
+<div class="max-w-4xl mx-auto mb-6 bg-white p-4 rounded-xl shadow-md border-2 border-orange-200 no-print">
+<h3 class="font-bold text-lg mb-3 text-orange-700 text-center" data-ar="📐 القواعد الأساسية" data-en=" Key Rules">📐 القواعد الأساسية</h3>
+<div class="grid md:grid-cols-2 gap-3 text-sm">
+<div class="formula-box"><strong>Proportion:</strong> a/b = c/d</div>
+<div class="formula-box"><strong>Cross Multiply:</strong> a × d = b × c</div>
+<div class="formula-box"><strong>Solve for x:</strong> x = (b × c) / d</div>
+<div class="formula-box"><strong>Check:</strong> Substitute back to verify</div>
+</div>
+<div class="proportion-example mt-4">
+<strong class="text-orange-800">مثال:</strong> <span class="math-display">x/45 = 15/25</span><br>
+<span class="text-sm text-orange-700">25x = 45 × 15 → 25x = 675 → x = 27</span>
+</div>
+</div>
+
+<main class="max-w-4xl mx-auto space-y-8" id="exam-content"></main>
+
+<div class="text-center no-print pb-8 mt-8">
+<button onclick="gradeExam()" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-lg px-10 py-4 rounded-2xl font-bold shadow-xl transition transform hover:scale-105 cursor-pointer" data-ar="🎯 صحح إجاباتي!" data-en="🎯 Grade My Answers!">🎯 صحح إجاباتي!</button>
+</div>
+
+<div id="results-panel" class="max-w-4xl mx-auto mt-8 bg-white p-8 rounded-2xl shadow-2xl border-4 border-orange-400 hidden no-print">
+<h2 class="text-3xl font-bold text-gray-900 mb-6 text-center" data-ar="🏆 نتيجتك يا بطل! 🏆" data-en="🏆 Your Results, Champion! 🏆">🏆 نتيجتك يا بطل! 🏆</h2>
+<div class="grid md:grid-cols-3 gap-4 mb-6">
+<div class="bg-orange-50 p-4 rounded-xl text-center"><p data-ar="😊 الاسم" data-en="😊 Name">😊 الاسم</p><p id="res-name" class="font-bold text-xl text-orange-700">-</p></div>
+<div class="bg-red-50 p-4 rounded-xl text-center"><p data-ar="📅 التاريخ" data-en="📅 Date">📅 التاريخ</p><p id="res-date" class="font-bold text-xl text-red-700">-</p></div>
+<div class="bg-orange-50 p-4 rounded-xl text-center"><p data-ar="🌟 المجموع" data-en="🌟 Score"> المجموع</p><p id="res-total" class="font-bold text-3xl text-orange-600">0 / 100</p></div>
+</div>
+<div class="text-center mb-6">
+<span id="success-badge" class="success-badge grade-excellent">-</span>
+<p id="success-percent" class="text-4xl font-bold text-orange-600 mt-2">0%</p>
+<p class="text-sm text-gray-500" data-ar="نسبة النجاح" data-en="Success Rate">نسبة النجاح</p>
+</div>
+<div class="bg-gray-50 p-6 rounded-xl mb-6">
+<h3 class="font-bold text-lg mb-4 text-gray-800" data-ar="📊 أدائك في كل قسم:" data-en="📊 Your Performance:">📊 أدائك في كل قسم:</h3>
+<div class="space-y-3" id="sections-performance"></div>
+</div>
+<div class="text-center mb-6">
+<button id="sendEmailBtn" onclick="sendResultsToEmail()" class="bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white text-lg px-8 py-3 rounded-2xl font-bold shadow-xl transition transform hover:scale-105 cursor-pointer" data-ar="📧 أرسل النتيجة للمعلم" data-en="📧 Send Results to Teacher">📧 أرسل النتيجة للمعلم</button>
+<p id="emailStatus" class="text-sm mt-2 text-center font-medium"></p>
+</div>
+<div class="flex gap-3 justify-center">
+<button onclick="window.print()" class="bg-gray-700 text-white px-6 py-3 rounded-xl font-semibold" data-ar="🖨️ طباعة النتيجة" data-en="🖨️ Print Results">🖨️ طباعة النتيجة</button>
+</div>
+</div>
+
+<footer class="max-w-4xl mx-auto mt-10 mb-8 text-center text-gray-500 text-sm no-print">
+© <span data-ar="حل التناسبات - الصف 9 متقدم" data-en="Solving Proportions - Grade 9 Advanced">حل التناسبات - الصف 9 متقدم</span> | Mr. Mohammed Hesham 📐
+</footer>
+
+<script>
+const PUBLIC_KEY = "Rb3Lq8tXaFmc5YHUH";
+const SERVICE_ID = "service_w15m64i";
+const TEMPLATE_ID = "template_5b0u2tq";
+const TARGET_EMAIL = "mohammedhesham872@gmail.com";
+emailjs.init(PUBLIC_KEY);
+
+const STORAGE_KEY = 'solving_proportions_grade9_exam_v1';
+const TOTAL_TIME = 2700;
+const TOTAL_QUESTIONS = 20;
+const TOTAL_SECTIONS = 4;
+
+let currentSeed = null;
+let answersVisible = false;
+let saveIndicatorTimeout = null;
+
+function mulberry32(a) {
+    return function() {
+        var t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    }
+}
+let rng = null;
+
+function showSaveIndicator() {
+    const indicator = document.getElementById('saveIndicator');
+    indicator.classList.add('show');
+    if (saveIndicatorTimeout) clearTimeout(saveIndicatorTimeout);
+    saveIndicatorTimeout = setTimeout(() => indicator.classList.remove('show'), 1500);
+}
+
+function saveState(showIndicator = true) {
+    try {
+        const state = {
+            seed: currentSeed, lang: currentLang,
+            studentName: document.getElementById('studentName').value,
+            studentClass: document.getElementById('studentClass').value,
+            examDate: document.getElementById('examDate').value,
+            answers: getSelectedAnswers(),
+            timeRemaining: timeRemaining,
+            answersVisible: answersVisible, savedAt: Date.now()
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        if (showIndicator) showSaveIndicator();
+    } catch (e) { console.error('خطأ في الحفظ:', e); }
+}
+
+function loadState() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return JSON.parse(saved);
+    } catch (e) { console.error('خطأ في التحميل:', e); }
+    return null;
+}
+
+function getSelectedAnswers() {
+    const answers = {};
+    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+        const selected = document.querySelector(`input[name="q${i}"]:checked`);
+        if (selected) answers[i] = selected.value;
+    }
+    return answers;
+}
+
+function restoreAnswers(answers) {
+    if (!answers) return;
+    for (const [idx, val] of Object.entries(answers)) {
+        const radio = document.querySelector(`input[name="q${idx}"][value="${val}"]`);
+        if (radio) radio.checked = true;
+    }
+}
+
+function clearProgress() {
+    const confirmMsg = currentLang === 'ar' ? '⚠️ هل أنت متأكد من مسح كل التقدم؟' : '⚠️ Are you sure you want to clear all progress?';
+    if (confirm(confirmMsg)) { localStorage.removeItem(STORAGE_KEY); location.reload(); }
+}
+
+function setupAnswerListeners() {
+    document.getElementById('exam-content').addEventListener('change', (e) => {
+        if (e.target.type === 'radio') saveState();
+    });
+}
+
+function setupInputListeners() {
+    ['studentName', 'studentClass', 'examDate'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', () => saveState(false));
+            el.addEventListener('blur', () => saveState());
+        }
+    });
+}
+
+const originalExamData = {
+    sections: [
+        {
+            id: 'sec1',
+            title: { ar: '🔹 الجزء 1: التناسبات البسيطة', en: ' Part 1: Simple Proportions' },
+            questions: [
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">x/45 = 15/25</span>', en: 'Solve: <span class="math-display">x/45 = 15/25</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 27</span>', en: '<span class="math-display">x = 27</span>' },
+                        { ar: '<span class="math-display">x = 25</span>', en: '<span class="math-display">x = 25</span>' },
+                        { ar: '<span class="math-display">x = 30</span>', en: '<span class="math-display">x = 30</span>' },
+                        { ar: '<span class="math-display">x = 20</span>', en: '<span class="math-display">x = 20</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '25x = 45 × 15 → 25x = 675 → x = 27', en: '25x = 45 × 15 → 25x = 675 → x = 27' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">3/8 = 15/a</span>', en: 'Solve: <span class="math-display">3/8 = 15/a</span>' },
+                    options: [
+                        { ar: '<span class="math-display">a = 40</span>', en: '<span class="math-display">a = 40</span>' },
+                        { ar: '<span class="math-display">a = 35</span>', en: '<span class="math-display">a = 35</span>' },
+                        { ar: '<span class="math-display">a = 45</span>', en: '<span class="math-display">a = 45</span>' },
+                        { ar: '<span class="math-display">a = 30</span>', en: '<span class="math-display">a = 30</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '3a = 8 × 15 → 3a = 120 → a = 40', en: '3a = 8 × 15 → 3a = 120 → a = 40' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">t/2 = 6/12</span>', en: 'Solve: <span class="math-display">t/2 = 6/12</span>' },
+                    options: [
+                        { ar: '<span class="math-display">t = 1</span>', en: '<span class="math-display">t = 1</span>' },
+                        { ar: '<span class="math-display">t = 2</span>', en: '<span class="math-display">t = 2</span>' },
+                        { ar: '<span class="math-display">t = 3</span>', en: '<span class="math-display">t = 3</span>' },
+                        { ar: '<span class="math-display">t = 4</span>', en: '<span class="math-display">t = 4</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '12t = 2 × 6 → 12t = 12 → t = 1', en: '12t = 2 × 6 → 12t = 12 → t = 1' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">4/9 = 13/q</span>', en: 'Solve: <span class="math-display">4/9 = 13/q</span>' },
+                    options: [
+                        { ar: '<span class="math-display">q = 29.25</span>', en: '<span class="math-display">q = 29.25</span>' },
+                        { ar: '<span class="math-display">q = 26</span>', en: '<span class="math-display">q = 26</span>' },
+                        { ar: '<span class="math-display">q = 32</span>', en: '<span class="math-display">q = 32</span>' },
+                        { ar: '<span class="math-display">q = 28</span>', en: '<span class="math-display">q = 28</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '4q = 9 × 13 → 4q = 117 → q = 29.25', en: '4q = 9 × 13 → 4q = 117 → q = 29.25' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(n-4)/8 = 3/2</span>', en: 'Solve: <span class="math-display">(n-4)/8 = 3/2</span>' },
+                    options: [
+                        { ar: '<span class="math-display">n = 16</span>', en: '<span class="math-display">n = 16</span>' },
+                        { ar: '<span class="math-display">n = 9.33</span>', en: '<span class="math-display">n = 9.33</span>' },
+                        { ar: '<span class="math-display">n = 8</span>', en: '<span class="math-display">n = 8</span>' },
+                        { ar: '<span class="math-display">n = 4.75</span>', en: '<span class="math-display">n = 4.75</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '2(n-4) = 8 × 3 → 2n - 8 = 24 → 2n = 32 → n = 16', en: '2(n-4) = 8 × 3 → 2n - 8 = 24 → 2n = 32 → n = 16' }
+                }
+            ]
+        },
+        {
+            id: 'sec2',
+            title: { ar: '🔹 الجزء 2: التناسبات مع متغيرات في البسط', en: ' Part 2: Proportions with Variables in Numerator' },
+            questions: [
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(x-3)/5 = 6/10</span>', en: 'Solve: <span class="math-display">(x-3)/5 = 6/10</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 6</span>', en: '<span class="math-display">x = 6</span>' },
+                        { ar: '<span class="math-display">x = 5</span>', en: '<span class="math-display">x = 5</span>' },
+                        { ar: '<span class="math-display">x = 7</span>', en: '<span class="math-display">x = 7</span>' },
+                        { ar: '<span class="math-display">x = 4</span>', en: '<span class="math-display">x = 4</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '10(x-3) = 5 × 6 → 10x - 30 = 30 → 10x = 60 → x = 6', en: '10(x-3) = 5 × 6 → 10x - 30 = 30 → 10x = 60 → x = 6' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(2y+1)/3 = 5/6</span>', en: 'Solve: <span class="math-display">(2y+1)/3 = 5/6</span>' },
+                    options: [
+                        { ar: '<span class="math-display">y = 0.75</span>', en: '<span class="math-display">y = 0.75</span>' },
+                        { ar: '<span class="math-display">y = 1</span>', en: '<span class="math-display">y = 1</span>' },
+                        { ar: '<span class="math-display">y = 0.5</span>', en: '<span class="math-display">y = 0.5</span>' },
+                        { ar: '<span class="math-display">y = 1.5</span>', en: '<span class="math-display">y = 1.5</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '6(2y+1) = 3 × 5 → 12y + 6 = 15 → 12y = 9 → y = 0.75', en: '6(2y+1) = 3 × 5 → 12y + 6 = 15 → 12y = 9 → y = 0.75' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(3m-2)/4 = 7/8</span>', en: 'Solve: <span class="math-display">(3m-2)/4 = 7/8</span>' },
+                    options: [
+                        { ar: '<span class="math-display">m = 1.5</span>', en: '<span class="math-display">m = 1.5</span>' },
+                        { ar: '<span class="math-display">m = 2</span>', en: '<span class="math-display">m = 2</span>' },
+                        { ar: '<span class="math-display">m = 1</span>', en: '<span class="math-display">m = 1</span>' },
+                        { ar: '<span class="math-display">m = 2.5</span>', en: '<span class="math-display">m = 2.5</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '8(3m-2) = 4 × 7 → 24m - 16 = 28 → 24m = 44 → m = 1.833...', en: '8(3m-2) = 4 × 7 → 24m - 16 = 28 → 24m = 44 → m ≈ 1.83' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(x+5)/12 = 3/4</span>', en: 'Solve: <span class="math-display">(x+5)/12 = 3/4</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 4</span>', en: '<span class="math-display">x = 4</span>' },
+                        { ar: '<span class="math-display">x = 5</span>', en: '<span class="math-display">x = 5</span>' },
+                        { ar: '<span class="math-display">x = 6</span>', en: '<span class="math-display">x = 6</span>' },
+                        { ar: '<span class="math-display">x = 3</span>', en: '<span class="math-display">x = 3</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '4(x+5) = 12 × 3 → 4x + 20 = 36 → 4x = 16 → x = 4', en: '4(x+5) = 12 × 3 → 4x + 20 = 36 → 4x = 16 → x = 4' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">(2a+3)/5 = 9/10</span>', en: 'Solve: <span class="math-display">(2a+3)/5 = 9/10</span>' },
+                    options: [
+                        { ar: '<span class="math-display">a = 0.75</span>', en: '<span class="math-display">a = 0.75</span>' },
+                        { ar: '<span class="math-display">a = 1</span>', en: '<span class="math-display">a = 1</span>' },
+                        { ar: '<span class="math-display">a = 1.5</span>', en: '<span class="math-display">a = 1.5</span>' },
+                        { ar: '<span class="math-display">a = 0.5</span>', en: '<span class="math-display">a = 0.5</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '10(2a+3) = 5 × 9 → 20a + 30 = 45 → 20a = 15 → a = 0.75', en: '10(2a+3) = 5 × 9 → 20a + 30 = 45 → 20a = 15 → a = 0.75' }
+                }
+            ]
+        },
+        {
+            id: 'sec3',
+            title: { ar: ' الجزء 3: التناسبات مع متغيرات في المقام', en: '🔹 Part 3: Proportions with Variables in Denominator' },
+            questions: [
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">7/(x+9) = 21/36</span>', en: 'Solve: <span class="math-display">7/(x+9) = 21/36</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 3</span>', en: '<span class="math-display">x = 3</span>' },
+                        { ar: '<span class="math-display">x = 4</span>', en: '<span class="math-display">x = 4</span>' },
+                        { ar: '<span class="math-display">x = 5</span>', en: '<span class="math-display">x = 5</span>' },
+                        { ar: '<span class="math-display">x = 2</span>', en: '<span class="math-display">x = 2</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '21(x+9) = 7 × 36 → 21x + 189 = 252 → 21x = 63 → x = 3', en: '21(x+9) = 7 × 36 → 21x + 189 = 252 → 21x = 63 → x = 3' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">10/15 = 4/(x-5)</span>', en: 'Solve: <span class="math-display">10/15 = 4/(x-5)</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 11</span>', en: '<span class="math-display">x = 11</span>' },
+                        { ar: '<span class="math-display">x = 10</span>', en: '<span class="math-display">x = 10</span>' },
+                        { ar: '<span class="math-display">x = 12</span>', en: '<span class="math-display">x = 12</span>' },
+                        { ar: '<span class="math-display">x = 9</span>', en: '<span class="math-display">x = 9</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '10(x-5) = 15 × 4 → 10x - 50 = 60 → 10x = 110 → x = 11', en: '10(x-5) = 15 × 4 → 10x - 50 = 60 → 10x = 110 → x = 11' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">5/(y+2) = 15/24</span>', en: 'Solve: <span class="math-display">5/(y+2) = 15/24</span>' },
+                    options: [
+                        { ar: '<span class="math-display">y = 6</span>', en: '<span class="math-display">y = 6</span>' },
+                        { ar: '<span class="math-display">y = 5</span>', en: '<span class="math-display">y = 5</span>' },
+                        { ar: '<span class="math-display">y = 7</span>', en: '<span class="math-display">y = 7</span>' },
+                        { ar: '<span class="math-display">y = 4</span>', en: '<span class="math-display">y = 4</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '15(y+2) = 5 × 24 → 15y + 30 = 120 → 15y = 90 → y = 6', en: '15(y+2) = 5 × 24 → 15y + 30 = 120 → 15y = 90 → y = 6' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">8/(3x-1) = 16/15</span>', en: 'Solve: <span class="math-display">8/(3x-1) = 16/15</span>' },
+                    options: [
+                        { ar: '<span class="math-display">x = 1.5</span>', en: '<span class="math-display">x = 1.5</span>' },
+                        { ar: '<span class="math-display">x = 2</span>', en: '<span class="math-display">x = 2</span>' },
+                        { ar: '<span class="math-display">x = 1</span>', en: '<span class="math-display">x = 1</span>' },
+                        { ar: '<span class="math-display">x = 2.5</span>', en: '<span class="math-display">x = 2.5</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '16(3x-1) = 8 × 15 → 48x - 16 = 120 → 48x = 136 → x = 2.833...', en: '16(3x-1) = 8 × 15 → 48x - 16 = 120 → 48x = 136 → x ≈ 2.83' }
+                },
+                {
+                    q: { ar: 'حل التناسب: <span class="math-display">12/(2m+4) = 6/5</span>', en: 'Solve: <span class="math-display">12/(2m+4) = 6/5</span>' },
+                    options: [
+                        { ar: '<span class="math-display">m = 3</span>', en: '<span class="math-display">m = 3</span>' },
+                        { ar: '<span class="math-display">m = 4</span>', en: '<span class="math-display">m = 4</span>' },
+                        { ar: '<span class="math-display">m = 2</span>', en: '<span class="math-display">m = 2</span>' },
+                        { ar: '<span class="math-display">m = 5</span>', en: '<span class="math-display">m = 5</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '6(2m+4) = 12 × 5 → 12m + 24 = 60 → 12m = 36 → m = 3', en: '6(2m+4) = 12 × 5 → 12m + 24 = 60 → 12m = 36 → m = 3' }
+                }
+            ]
+        },
+        {
+            id: 'sec4',
+            title: { ar: '🔹 الجزء 4: مسائل تطبيقية على التناسبات', en: '🔹 Part 4: Applied Proportion Problems' },
+            questions: [
+                {
+                    q: { ar: 'إذا كان 3 أقلام تكلف $4.50، فكم تكلف 7 أقلام؟', en: 'If 3 pens cost $4.50, how much do 7 pens cost?' },
+                    options: [
+                        { ar: '<span class="math-display">$10.50</span>', en: '<span class="math-display">$10.50</span>' },
+                        { ar: '<span class="math-display">$9.00</span>', en: '<span class="math-display">$9.00</span>' },
+                        { ar: '<span class="math-display">$12.00</span>', en: '<span class="math-display">$12.00</span>' },
+                        { ar: '<span class="math-display">$8.50</span>', en: '<span class="math-display">$8.50</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '3/4.50 = 7/x → 3x = 31.50 → x = $10.50', en: '3/4.50 = 7/x → 3x = 31.50 → x = $10.50' }
+                },
+                {
+                    q: { ar: 'سيارة تقطع 240 كم في 3 ساعات. كم كم تقطع في 5 ساعات بنفس السرعة؟', en: 'A car travels 240 km in 3 hours. How many km in 5 hours at same speed?' },
+                    options: [
+                        { ar: '<span class="math-display">400 km</span>', en: '<span class="math-display">400 km</span>' },
+                        { ar: '<span class="math-display">350 km</span>', en: '<span class="math-display">350 km</span>' },
+                        { ar: '<span class="math-display">450 km</span>', en: '<span class="math-display">450 km</span>' },
+                        { ar: '<span class="math-display">380 km</span>', en: '<span class="math-display">380 km</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '240/3 = x/5 → 3x = 1200 → x = 400 km', en: '240/3 = x/5 → 3x = 1200 → x = 400 km' }
+                },
+                {
+                    q: { ar: 'وصفة تحتاج 2 كوب دقيق لـ 12 كعكة. كم كوب دقيق لـ 30 كعكة؟', en: 'Recipe needs 2 cups flour for 12 cookies. How many cups for 30 cookies?' },
+                    options: [
+                        { ar: '<span class="math-display">5 أكواب</span>', en: '<span class="math-display">5 cups</span>' },
+                        { ar: '<span class="math-display">4 أكواب</span>', en: '<span class="math-display">4 cups</span>' },
+                        { ar: '<span class="math-display">6 أكواب</span>', en: '<span class="math-display">6 cups</span>' },
+                        { ar: '<span class="math-display">4.5 أكواب</span>', en: '<span class="math-display">4.5 cups</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '2/12 = x/30 → 12x = 60 → x = 5 أكواب', en: '2/12 = x/30 → 12x = 60 → x = 5 cups' }
+                },
+                {
+                    q: { ar: 'خريطة بمقياس 1:50000. إذا كانت المسافة على الخريطة 8 سم، فما المسافة الحقيقية بالمتر؟', en: 'Map scale 1:50000. If map distance is 8 cm, what is real distance in meters?' },
+                    options: [
+                        { ar: '<span class="math-display">4000 m</span>', en: '<span class="math-display">4000 m</span>' },
+                        { ar: '<span class="math-display">400 m</span>', en: '<span class="math-display">400 m</span>' },
+                        { ar: '<span class="math-display">40000 m</span>', en: '<span class="math-display">40000 m</span>' },
+                        { ar: '<span class="math-display">5000 m</span>', en: '<span class="math-display">5000 m</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '1/50000 = 8/x → x = 400000 cm = 4000 m', en: '1/50000 = 8/x → x = 400000 cm = 4000 m' }
+                },
+                {
+                    q: { ar: 'إذا كان 5 عمال ينجزون عملاً في 12 يوماً، فكم يوماً يحتاج 8 عمال؟', en: 'If 5 workers complete a job in 12 days, how many days for 8 workers?' },
+                    options: [
+                        { ar: '<span class="math-display">7.5 يوم</span>', en: '<span class="math-display">7.5 days</span>' },
+                        { ar: '<span class="math-display">8 يوم</span>', en: '<span class="math-display">8 days</span>' },
+                        { ar: '<span class="math-display">6 يوم</span>', en: '<span class="math-display">6 days</span>' },
+                        { ar: '<span class="math-display">9 يوم</span>', en: '<span class="math-display">9 days</span>' }
+                    ],
+                    correct: 0,
+                    answer: { ar: '5 × 12 = 8 × x → 60 = 8x → x = 7.5 يوم', en: '5 × 12 = 8 × x → 60 = 8x → x = 7.5 days' }
+                }
+            ]
+        }
+    ]
+};
+
+function shuffleArray(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(rng() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+let examData;
+let correctAnswersMap = {};
+let currentLang = 'ar';
+let timeRemaining = TOTAL_TIME;
+let timerInterval;
+
+function prepareShuffledExam() {
+    rng = mulberry32(currentSeed);
+    examData = JSON.parse(JSON.stringify(originalExamData));
+    correctAnswersMap = {};
+    let globalIdx = 0;
+    examData.sections.forEach((section) => {
+        section.questions = shuffleArray(section.questions);
+        section.questions.forEach((q) => {
+            const optionsWithCorrect = q.options.map((opt, idx) => ({ option: opt, isCorrect: idx === q.correct }));
+            const shuffledOptions = shuffleArray(optionsWithCorrect);
+            q.options = shuffledOptions.map(o => o.option);
+            q.correct = shuffledOptions.findIndex(o => o.isCorrect);
+            correctAnswersMap[globalIdx] = String.fromCharCode(97 + q.correct);
+            globalIdx++;
+        });
+    });
+}
+
+function reshuffleExam() {
+    const msg = currentLang === 'ar' ? '🔄 سيتم إنشاء أسئلة جديدة ومسح إجاباتك الحالية. هل أنت متأكد؟' : '🔄 New questions will be generated and current answers cleared. Are you sure?';
+    if (confirm(msg)) {
+        currentSeed = Date.now(); timeRemaining = TOTAL_TIME; answersVisible = false;
+        prepareShuffledExam(); renderExam(); saveState();
+        alert(currentLang === 'ar' ? '🎲 تم تغيير الأسئلة! حظاً موفقاً! 🍀' : '🎲 Questions changed! Good luck! 🍀');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+}
+
+function setLanguage(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.getElementById('btn-ar').classList.toggle('active', lang === 'ar');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    document.body.classList.toggle('en-mode', lang === 'en');
+    document.querySelectorAll('[data-ar][data-en]').forEach(el => {
+        el.innerHTML = lang === 'ar' ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+    });
+    renderExam(); saveState(false);
+}
+
+function renderExam() {
+    const container = document.getElementById('exam-content');
+    const labels = { ar: { option: ['أ', 'ب', 'ج', 'د'], answer: '✅ الإجابة:' }, en: { option: ['A', 'B', 'C', 'D'], answer: '✅ Answer:' } };
+    const lbl = labels[currentLang]; const isRTL = currentLang === 'ar';
+    let html = ''; let globalIdx = 0;
+    examData.sections.forEach((section) => {
+        html += `<section class="bg-white p-6 rounded-2xl shadow-lg border-2 border-orange-100">
+            <h2 class="text-xl font-bold mb-4 text-orange-700">${section.title[currentLang]}</h2>
+            <ol class="space-y-4 text-sm">`;
+        section.questions.forEach((q) => {
+            const bs = isRTL ? 'border-r-4 pr-4' : 'border-l-4 pl-4';
+            html += `<li class="${bs} border-orange-400 py-2" id="q-${globalIdx}">
+                <strong>${globalIdx + 1}.</strong> ${q.q[currentLang]}<br>`;
+            q.options.forEach((opt, oIdx) => {
+                const rs = isRTL ? 'mr-4 ml-2' : 'ml-4 mr-2';
+                html += `<label class="cursor-pointer block mt-1 ${isRTL ? 'mr-4' : 'ml-4'} hover:bg-orange-50 rounded-lg p-1 transition">
+                    <input type="radio" name="q${globalIdx}" value="${String.fromCharCode(97 + oIdx)}" class="${rs}">
+                    ${lbl.option[oIdx]}) ${opt[currentLang]}</label>`;
+            });
+            html += `<div class="answer-box text-green-700 mt-2 font-medium ${answersVisible ? '' : 'hidden'} bg-green-50 rounded-lg p-2">
+                ${lbl.answer} ${lbl.option[q.correct]}) ${q.options[q.correct][currentLang]} — ${q.answer[currentLang]}</div></li>`;
+            globalIdx++;
+        });
+        html += `</ol></section>`;
+    });
+    container.innerHTML = html;
+}
+
+function startTimer() {
+    updateTimerDisplay();
+    timerInterval = setInterval(() => {
+        timeRemaining--; updateTimerDisplay();
+        if (timeRemaining % 60 === 0) saveState(false);
+        if (timeRemaining <= 600) document.getElementById('timer').classList.add('timer-warning');
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            alert(currentLang === 'ar' ? "⏰ انتهى الوقت!" : "⏰ Time's up!");
+            gradeExam();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const m = Math.floor(timeRemaining / 60); const s = timeRemaining % 60;
+    document.getElementById('timer').textContent = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+
+function toggleAnswers() {
+    answersVisible = !answersVisible;
+    document.querySelectorAll('.answer-box').forEach(el => el.classList.toggle('hidden', !answersVisible));
+    saveState(false);
+}
+
+function gradeExam() {
+    let correctCount = 0;
+    const sectionScores = new Array(TOTAL_SECTIONS).fill(0);
+    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+        const sel = document.querySelector(`input[name="q${i}"]:checked`);
+        const li = document.getElementById(`q-${i}`);
+        if (li) {
+            const isCorrect = sel && sel.value === correctAnswersMap[i];
+            if (isCorrect) { correctCount++; li.classList.add('correct'); li.classList.remove('incorrect'); sectionScores[Math.floor(i / 5)]++; }
+            else { li.classList.add('incorrect'); li.classList.remove('correct'); }
+        }
+    }
+    const score = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
+    document.getElementById('res-total').textContent = `${score} / 100`;
+    document.getElementById('res-name').textContent = document.getElementById('studentName').value || (currentLang === 'ar' ? 'بطل' : 'Champion');
+    document.getElementById('res-date').textContent = new Date().toLocaleDateString(currentLang === 'ar' ? 'ar-AE' : 'en-US');
+    const pc = document.getElementById('sections-performance'); pc.innerHTML = '';
+    examData.sections.forEach((s, idx) => {
+        pc.innerHTML += `<div class="flex justify-between items-center"><span class="text-gray-700">${s.title[currentLang]}</span><span class="font-bold text-orange-700">${sectionScores[idx]}/5</span></div>`;
+    });
+    const badge = document.getElementById('success-badge');
+    document.getElementById('success-percent').textContent = `${score}%`;
+    if (currentLang === 'ar') {
+        if (score >= 90) { badge.textContent = '🌟 ممتاز جداً!'; badge.className = 'success-badge grade-excellent'; }
+        else if (score >= 75) { badge.textContent = '👏 ممتاز!'; badge.className = 'success-badge grade-good'; }
+        else if (score >= 50) { badge.textContent = '👍 جيد'; badge.className = 'success-badge grade-pass'; }
+        else { badge.textContent = '💪 حاول مرة أخرى'; badge.className = 'success-badge grade-fail'; }
+    } else {
+        if (score >= 90) { badge.textContent = '🌟 Outstanding!'; badge.className = 'success-badge grade-excellent'; }
+        else if (score >= 75) { badge.textContent = '👏 Excellent!'; badge.className = 'success-badge grade-good'; }
+        else if (score >= 50) { badge.textContent = '👍 Good'; badge.className = 'success-badge grade-pass'; }
+        else { badge.textContent = '💪 Try Again'; badge.className = 'success-badge grade-fail'; }
+    }
+    document.getElementById('results-panel').classList.remove('hidden');
+    document.getElementById('results-panel').scrollIntoView({ behavior: 'smooth' });
+    if (timerInterval) clearInterval(timerInterval);
+}
+
+function sendResultsToEmail() {
+    const btn = document.getElementById('sendEmailBtn');
+    const status = document.getElementById('emailStatus');
+    btn.disabled = true;
+    btn.textContent = currentLang === 'ar' ? '⏳ جاري الإرسال...' : '⏳ Sending...';
+    const name = document.getElementById('studentName').value || 'N/A';
+    const studentClass = document.getElementById('studentClass').value || 'N/A';
+    const date = document.getElementById('examDate').value || new Date().toLocaleDateString();
+    const score = document.getElementById('res-total').textContent;
+    const successRate = document.getElementById('success-percent').textContent;
+    const badge = document.getElementById('success-badge').textContent;
+    let questionsHTML = ''; let globalIdx = 0;
+    examData.sections.forEach((section, sectionIdx) => {
+        questionsHTML += `<tr style="background:linear-gradient(135deg,#ea580c,#dc2626);color:white;"><td colspan="5" style="padding:12px;font-weight:bold;">📌 ${currentLang==='ar'?'القسم':'Section'} ${sectionIdx+1}: ${section.title[currentLang]}</td></tr>`;
+        section.questions.forEach((q) => {
+            const sel = document.querySelector(`input[name="q${globalIdx}"]:checked`);
+            const sv = sel ? sel.value : null; const cv = correctAnswersMap[globalIdx]; const ic = sv === cv;
+            let sat = currentLang==='ar'?'❌ لم يجب':'❌ No answer'; let sac = '#dc2626';
+            if (sv) { const si = sv.charCodeAt(0)-97; sat = q.options[si][currentLang]; sac = ic?'#059669':'#dc2626'; }
+            const cat = q.options[q.correct][currentLang];
+            const rb = ic?'#f0fdf4':'#fef2f2'; const bl = ic?'4px solid #10b981':'4px solid #ef4444';
+            questionsHTML += `<tr style="background:${rb};border-right:${bl};"><td style="padding:10px;border:1px solid #e5e7eb;text-align:center;font-weight:bold;">${globalIdx+1}</td><td style="padding:10px;border:1px solid #e5e7eb;"><strong style="color:#9a3412;">${currentLang==='ar'?'❓ السؤال:':'❓ Question:'}</strong><br><span style="font-size:13px;">${q.q[currentLang]}</span></td><td style="padding:10px;border:1px solid #e5e7eb;"><strong style="color:${sac};">${currentLang==='ar'?'✍️ إجابة الطالب:':'✍️ Student:'}</strong><br><span style="color:${sac};font-size:13px;">${sat}</span></td><td style="padding:10px;border:1px solid #e5e7eb;"><strong style="color:#059669;">${currentLang==='ar'?'✅ الصحيحة:':'✅ Correct:'}</strong><br><span style="color:#059669;font-size:13px;">${cat}</span></td><td style="padding:10px;border:1px solid #e5e7eb;text-align:center;">${ic?'<span style="font-size:24px;">✅</span>':'<span style="font-size:24px;">❌</span>'}</td></tr>`;
+            globalIdx++;
+        });
+    });
+    const answersHTML = `<div style="font-family:'Segoe UI',Tahoma,Arial;direction:${currentLang==='ar'?'rtl':'ltr'};"><div style="background:linear-gradient(135deg,#ea580c,#dc2626);color:white;padding:20px;border-radius:10px 10px 0 0;text-align:center;"><h2 style="margin:0;">${currentLang==='ar'?'نتيجة امتحان حل التناسبات':'Solving Proportions Exam Result'}</h2><p style="margin:5px 0 0;opacity:0.9;">Grade 9 Advanced - Mathematics</p></div><div style="background:#fff7ed;padding:15px;"><table style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px;font-weight:bold;color:#9a3412;">${currentLang==='ar'?'😊 الاسم:':'😊 Name:'}</td><td style="padding:8px;">${name}</td><td style="padding:8px;font-weight:bold;color:#9a3412;">${currentLang==='ar'?'🏫 الشعبة:':'🏫 Class:'}</td><td style="padding:8px;">${studentClass}</td></tr><tr><td style="padding:8px;font-weight:bold;color:#9a3412;">${currentLang==='ar'?' التاريخ:':'📅 Date:'}</td><td style="padding:8px;">${date}</td><td style="padding:8px;font-weight:bold;color:#9a3412;">${currentLang==='ar'?'🏆 التقدير:':' Grade:'}</td><td style="padding:8px;">${badge}</td></tr></table></div><div style="background:white;padding:20px;text-align:center;"><div style="display:inline-block;margin:0 15px;"><div style="font-size:32px;font-weight:bold;color:#ea580c;">${score}</div><div style="color:#6b7280;font-size:13px;">${currentLang==='ar'?'الدرجة':'Score'}</div></div><div style="display:inline-block;margin:0 15px;"><div style="font-size:32px;font-weight:bold;color:#059669;">${successRate}%</div><div style="color:#6b7280;font-size:13px;">${currentLang==='ar'?'النسبة':'Rate'}</div></div></div><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr style="background:#ea580c;color:white;"><th style="padding:10px;border:1px solid #dc2626;">#</th><th style="padding:10px;border:1px solid #dc2626;">${currentLang==='ar'?'السؤال':'Question'}</th><th style="padding:10px;border:1px solid #dc2626;">${currentLang==='ar'?'إجابة الطالب':'Student'}</th><th style="padding:10px;border:1px solid #dc2626;">${currentLang==='ar'?'الصحيحة':'Correct'}</th><th style="padding:10px;border:1px solid #dc2626;">${currentLang==='ar'?'النتيجة':'Result'}</th></tr></thead><tbody>${questionsHTML}</tbody></table><div style="background:linear-gradient(135deg,#fff7ed,#ffedd5);padding:15px;border-radius:0 0 10px 10px;"><p style="margin:0;color:#9a3412;text-align:center;">📐 <strong>${currentLang==='ar'?'أحسنت يا بطل! استمر في إتقان الرياضيات!':'Great job! Keep mastering Mathematics!'}</strong> 📐</p><p style="margin:5px 0 0;color:#9a3412;text-align:center;font-size:12px;">${currentLang==='ar'?'تم الإرسال تلقائياً | Mr. Mohammed Hesham':'Auto-sent | Mr. Mohammed Hesham'}</p></div></div>`;
+    emailjs.send(SERVICE_ID, TEMPLATE_ID, { to_email: TARGET_EMAIL, student_name: name, student_class: studentClass, exam_date: date, total_score: score, success_rate: successRate, grade: badge, answers_table: answersHTML }).then(() => {
+        status.textContent = currentLang==='ar'?'✅ تم الإرسال بنجاح!':'✅ Sent successfully!'; status.style.color = '#059669'; btn.textContent = currentLang==='ar'?'✓ تم':'✓ Sent';
+    }).catch(err => {
+        status.textContent = currentLang==='ar'?'❌ حدث خطأ':'❌ Error'; status.style.color = '#dc2626'; btn.disabled = false; btn.textContent = currentLang==='ar'?'📧 حاول مرة أخرى':'📧 Try Again'; console.error(err);
+    });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const saved = loadState();
+    if (saved && saved.seed) {
+        currentSeed = saved.seed; currentLang = saved.lang || 'ar';
+        timeRemaining = saved.timeRemaining !== undefined ? saved.timeRemaining : TOTAL_TIME;
+        answersVisible = saved.answersVisible || false;
+        document.documentElement.lang = currentLang;
+        document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.getElementById('btn-ar').classList.toggle('active', currentLang === 'ar');
+        document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+        document.body.classList.toggle('en-mode', currentLang === 'en');
+        document.querySelectorAll('[data-ar][data-en]').forEach(el => { el.innerHTML = currentLang === 'ar' ? el.getAttribute('data-ar') : el.getAttribute('data-en'); });
+    } else { currentSeed = Date.now(); }
+    prepareShuffledExam(); renderExam();
+    if (saved) {
+        if (saved.studentName) document.getElementById('studentName').value = saved.studentName;
+        if (saved.studentClass) document.getElementById('studentClass').value = saved.studentClass;
+        if (saved.examDate) document.getElementById('examDate').value = saved.examDate;
+        if (saved.answers) restoreAnswers(saved.answers);
+    }
+    setupAnswerListeners(); setupInputListeners(); startTimer();
+});
+window.addEventListener('beforeunload', () => saveState(false));
+</script>
+</body>
+</html>
